@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 19;
+use Test::More tests => 20;
 use Test::Exception;
 
 # this represents a single page of results
@@ -25,7 +25,7 @@ my @dataset = qw( fee fi fo foo fum );
 }
 
 
-my $where = { this => 'that' };
+my $where = { 'this' => 'that' };
 my $order_by = [ 'fig' ];
 
 my ( $pager, @results );
@@ -36,12 +36,17 @@ my ( $pager, @results );
 #                                                               3,
 #                                                               ) } 'survived search_where_paged';
 
+# it's ugly - @results contains @dataset, 'TestApp', $phrase, @bind_values
+# because of TestApp::retrieve_from_sql overriding the real CDBI::retrieve_from_sql, 
+# instead of being a list of CDBI objects
 lives_ok { ( $pager, @results ) = TestApp->pager->search_where( { this => 'that' },
                                                                 { order_by => 'fig' },
                                                                 scalar( @dataset ),
                                                                 3,
                                                               ) } 'survived search_where';
-
+                                                              
+ok( @results > 0, 'got some results' );
+                                                              
 is($results[-2], '( this = ? ) ORDER BY fig LIMIT 5 OFFSET 10', 'search_where results');
 
 lives_ok { $pager = TestApp->pager } 'get pager - no args';

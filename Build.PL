@@ -11,14 +11,14 @@ my $builder = Module::Build->new(
                   'Test::Exception' => 0,
                   'Class::DBI' => 0.90,
                   'SQL::Abstract' => 0,
-                  'Data::Page' => 0,
+                  'Data::Page' => 2,
                   'Class::DBI::Plugin::AbstractCount' => 0,
-                  'Class::Accessor' => 0,
                   'Class::Data::Inheritable' => 0,
                   'UNIVERSAL::require' => 0,
                   Carp => 0,
                   },
     add_to_cleanup      => [ 'Class-DBI-Plugin-Pager-*' ],
+    create_makefile_pl  => 'traditional',
 );
 
-$builder->create_build_script();
+$builder->create_build_script;

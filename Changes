@@ -1,5 +1,9 @@
 Revision history for Class-DBI-Plugin-Pager
 
+0.53  Fri Dec 17 22:25:00 2004
+		- caught up with changes in Data::Page v2 
+		- added dependency on Class::Accessor::Chained::Fast
+
 0.521 Fri Dec 10 17:00:00 2004
     - fixed quoting bug in Build.PL (reported by Max Maischein)
 

@@ -6,16 +6,18 @@ use Carp;
 use UNIVERSAL::require;
 use SQL::Abstract;
 
-use base qw( Data::Page Class::Accessor Class::Data::Inheritable );
+use base qw( Data::Page Class::Data::Inheritable ); 
 
+use vars qw( $VERSION );
+
+$VERSION = 0.53;
+
+# D::P inherits from Class::Accessor::Chained::Fast
 __PACKAGE__->mk_accessors( qw( where abstract_attr per_page page order_by _cdbi_app ) );
 
 __PACKAGE__->mk_classdata( '_syntax' );
 __PACKAGE__->mk_classdata( '_pager_class' );
 
-use vars '$VERSION';
-
-$VERSION = 0.521;
 
 =head1 NAME
 
@@ -259,22 +261,21 @@ sub search_where {
 sub _setup_pager {
     my ( $self ) = @_;
 
-    my $where = $self->where || croak( 'must set a query before retrieving results' );
+    my $where    = $self->where    || croak( 'must set a query before retrieving results' );
+    my $per_page = $self->per_page || croak( 'no. of entries per page not specified' );
+    my $cdbi     = $self->_cdbi_app;
+    my $count    = $cdbi->count_search_where( $where );
+    my $page     = $self->page || 1;
 
-    my $cdbi = $self->_cdbi_app;
-
-    my $count = $cdbi->count_search_where( $where );
-
-    # copy Data::Page->new
-    $self->{TOTAL_ENTRIES}      = $count;
-    $self->{ENTRIES_PER_PAGE}   = $self->per_page || croak( 'no. of entries per page not specified' );
-    $self->{CURRENT_PAGE}       = $self->page || 1;
-
+    $self->total_entries( $count );
+    $self->entries_per_page( $per_page );
+    $self->current_page( $page );
+    
     croak( 'Fewer than one entry per page!' ) if $self->entries_per_page < 1;
 
-    $self->{CURRENT_PAGE} = $self->first_page unless defined $self->current_page;
-    $self->{CURRENT_PAGE} = $self->first_page if $self->current_page < $self->first_page;
-    $self->{CURRENT_PAGE} = $self->last_page  if $self->current_page > $self->last_page;
+    $self->current_page( $self->first_page ) unless defined $self->current_page;
+    $self->current_page( $self->first_page ) if $self->current_page < $self->first_page;
+    $self->current_page( $self->last_page  ) if $self->current_page > $self->last_page;
 }
 
 =item set_syntax( [ $name || $class || $coderef ] )
