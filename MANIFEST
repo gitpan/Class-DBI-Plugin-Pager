@@ -5,6 +5,7 @@ Pager.pm
 README
 Pager/LimitOffset.pm
 Pager/LimitXY.pm
+Pager/LimitYX.pm
 Pager/RowsTo.pm
 t/01_compile.t
 t/02_compile.t

@@ -15,7 +15,7 @@ __PACKAGE__->mk_classdata( '_pager_class' );
 
 use vars '$VERSION';
 
-$VERSION = 0.5;
+$VERSION = 0.51;
 
 =head1 NAME
 
@@ -342,7 +342,7 @@ Supports the following drivers:
                       DRIVER        CDBI::P::Pager subclass
     my %supported = ( pg        => 'LimitOffset',
                       mysql     => 'LimitOffset', # older versions need LimitXY
-                      sqlite    => 'LimitOffset', # LimitXY should also work
+                      sqlite    => 'LimitOffset', # or LimitYX
                       interbase => 'RowsTo',
                       firebird  => 'RowsTo',
                       );
@@ -368,7 +368,7 @@ sub auto_set_syntax {
     # additions welcome
     my %supported = ( pg        => 'LimitOffset',
                       mysql     => 'LimitOffset', # older versions need LimitXY
-                      sqlite    => 'LimitOffset', # LimitXY should also work
+                      sqlite    => 'LimitOffset', # or LimitYX
                       interbase => 'RowsTo',
                       firebird  => 'RowsTo',
                       );
@@ -474,7 +474,13 @@ others.
 
     LIMIT $offset, $rows
 
-I think this syntax is only used by older versions of MySQL, or by SQLite.
+Older versions of MySQL.
+
+=item Class::DBI::Plugin::LimitYX
+
+    LIMIT $rows, $offset
+
+SQLite.
 
 =item Class::DBI::Plugin::RowsTo
 
