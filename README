@@ -1,0 +1,30 @@
+Class/DBI/Plugin/Pager version 0.4
+===================================
+
+Paged search results for L<Class::DBI|Class::DBI>.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+L<SQL::Abstract|SQL::Abstract>,
+L<Data::Page|Data::Page>,
+L<Class::DBI::Plugin::AbstractCount|Class::DBI::Plugin::AbstractCount>,
+L<Class::Accessor|Class::Accessor>,
+L<Class::Data::Inheritable|Class::Data::Inheritable>,
+L<Carp|Carp>.
+
+COPYRIGHT AND LICENCE
+
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+Copyright (C) 2004 David R. Baird
+

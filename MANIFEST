@@ -1,0 +1,13 @@
+Changes
+Makefile.PL
+MANIFEST
+Pager.pm
+README
+Pager/LimitOffset.pm
+Pager/LimitXY.pm
+Pager/RowsTo.pm
+t/01_compile.t
+t/02_compile.t
+t/03_main.t
+t/04_subclass.t
+

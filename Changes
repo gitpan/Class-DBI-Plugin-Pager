@@ -1,0 +1,6 @@
+Revision history for Perl extension Class::DBI::Plugin::Pager.
+
+0.4  Fri Oct 22 00:41:07 2004
+	- original version; created by h2xs 1.21 with options
+		-XAn Class::DBI::Plugin::Pager
+
