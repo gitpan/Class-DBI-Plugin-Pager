@@ -1,5 +1,8 @@
 Revision history for Class-DBI-Plugin-Pager
 
+0.521 Fri Dec 10 17:00:00 2004
+    - fixed quoting bug in Build.PL (reported by Max Maischein)
+
 0.52 Thu Dec 9  23:10:00 2004
     - patch to accept order_by arguments in the
       same way as CDBI::AbstractSearch uses (Vince Veselosky)

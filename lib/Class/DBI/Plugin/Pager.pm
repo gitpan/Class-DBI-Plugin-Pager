@@ -15,7 +15,7 @@ __PACKAGE__->mk_classdata( '_pager_class' );
 
 use vars '$VERSION';
 
-$VERSION = 0.52;
+$VERSION = 0.521;
 
 =head1 NAME
 
