@@ -1,5 +1,8 @@
 Revision history for Class-DBI-Plugin-Pager
 
+0.6_4 Wed Apr  6 24:15:00 2005
+    - POD updates
+
 0.6_3 Wed Apr  6 23:45:00 2005
     - added tests to check argument parsing (07.args.t)
     - fixed minor bugs in argument parsing

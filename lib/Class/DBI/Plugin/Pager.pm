@@ -10,7 +10,7 @@ use base qw( Data::Page Class::Data::Inheritable );
 
 use vars qw( $VERSION );
 
-$VERSION = '0.6_3';
+$VERSION = '0.6_4';
 
 # D::P inherits from Class::Accessor::Chained::Fast
 __PACKAGE__->mk_accessors( qw( _where abstract_attr per_page page _order_by _cdbi_app ) );
@@ -420,51 +420,49 @@ sub _setup_pager {
     $self->current_page( $self->last_page  ) if $self->current_page > $self->last_page;
 }
 
-=for retiring
 
-sub _get_count {
-    my ( $self ) = @_;
 
-    my $where = $self->where || croak( 'must set a query before retrieving results' );
-    my $cdbi  = $self->_cdbi_app;
-    
-    # Class::DBI::Plugin::AbstractCount can handle SQL::Abstract attributes
-    return $cdbi->count_search_where( $where, $self->abstract_attr ) 
-        if $cdbi->can( 'count_search_where' );
-        
-    # Class::DBI::Plugin::CountSearch correctly handles aliased column accessors 
-    # (i.e. accessors for columns where the accessor has a different name from the 
-    # column). But it can't handle SQL::Abstract attributes. 
-    croak( 'no way to count total entries' ) unless $cdbi->can( 'count_search' );
-    
-    croak( 'Class::DBI::Plugin::CountSearch does not handle SQL::Abstract attributes - '
-            . 'use Class::DBI::Plugin::AbstractCount instead' )
-        if $self->abstract_attr;
-        
-    my @cols = keys %$where;
-    
-    croak('no keys in where clause') unless @cols > 0;
-    
-    # unqualified count
-    return $cdbi->count_search if ( @cols == 1 and $cols[0] eq '1' );
-    
-    # count with search fields
-    my @args;
-    
-    foreach my $col ( @cols )
-    {
-        my $expr = $where->{$col};
-        
-        croak( "code doesn't handle anything but 'like'!" )
-            unless keys %$expr == 1 and $expr->{like};
-        
-        push @args, $col => $expr->{like};
-    }
-    
-    return $cdbi->count_search_like( @args );
-}
-
-=cut
+#sub _get_count {
+#    my ( $self ) = @_;
+#
+#    my $where = $self->where || croak( 'must set a query before retrieving results' );
+#    my $cdbi  = $self->_cdbi_app;
+#    
+#    # Class::DBI::Plugin::AbstractCount can handle SQL::Abstract attributes
+#    return $cdbi->count_search_where( $where, $self->abstract_attr ) 
+#        if $cdbi->can( 'count_search_where' );
+#        
+#    # Class::DBI::Plugin::CountSearch correctly handles aliased column accessors 
+#    # (i.e. accessors for columns where the accessor has a different name from the 
+#    # column). But it can't handle SQL::Abstract attributes. 
+#    croak( 'no way to count total entries' ) unless $cdbi->can( 'count_search' );
+#    
+#    croak( 'Class::DBI::Plugin::CountSearch does not handle SQL::Abstract attributes - '
+#            . 'use Class::DBI::Plugin::AbstractCount instead' )
+#        if $self->abstract_attr;
+#        
+#    my @cols = keys %$where;
+#    
+#    croak('no keys in where clause') unless @cols > 0;
+#    
+#    # unqualified count
+#    return $cdbi->count_search if ( @cols == 1 and $cols[0] eq '1' );
+#    
+#    # count with search fields
+#    my @args;
+#    
+#    foreach my $col ( @cols )
+#    {
+#        my $expr = $where->{$col};
+#        
+#        croak( "code doesn't handle anything but 'like'!" )
+#            unless keys %$expr == 1 and $expr->{like};
+#        
+#        push @args, $col => $expr->{like};
+#    }
+#   
+#    return $cdbi->count_search_like( @args );
+#}
 
 # SQL::Abstract::_recurse_where eats the WHERE clause 
 #sub where {
@@ -735,11 +733,6 @@ Each query issues two requests to the database - the first to count the entire
 result set, the second to retrieve the required subset of results. If your
 tables are small it may be quicker to use L<Class::DBI::Pager|Class::DBI::Pager>.
 
-This class will use L<Class::DBI::Plugin::AbstractCount|Class::DBI::Plugin::AbstractCount> 
-to count the result set, if it is loaded, otherwise it will look for L<Class::DBI::Plugin::CountSearch|Class::DBI::Plugin::CountSearch>. The latter 
-is more limited in its search capabilities but does correctly handle
-Class::DBI accessor functions whose name differs from that of the column.
-
 The C<order_by> clause means the database has to retrieve (internally) and sort
 the entire results set, before chopping out the requested subset. It's probably
 a good idea to have an index on the column(s) used to order the results. For
@@ -757,7 +750,10 @@ L<Carp|Carp>.
 =head1 SEE ALSO
 
 L<Class::DBI::Pager|Class::DBI::Pager> does a similar job, but retrieves
-the entire results set into memory before chopping out the page you want.
+data representing the entire results set into memory before chopping out the 
+page you want. This is often not going to be a problem, since the data are 
+only the primary key IDs. I'd recommend careful benchmarking before deciding 
+which pager to use (and I'd be interested in seeing anyone's benchmarks). 
 
 =head1 BUGS
 
