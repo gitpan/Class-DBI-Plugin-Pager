@@ -8,9 +8,7 @@ use Test::Exception;
 
 use Data::Dumper::Simple;
 
-plan tests => 17;
-
-use_ok "Class::DBI::mysql";
+plan tests => 16;
 
 # Lifted from CDBI::mysql tests
 
@@ -75,7 +73,6 @@ for ( 1 .. 200 )
 }    
 #-------------------------------------------------------------------------
 
-# kick off
 {   
     my ( $it, @results );
     

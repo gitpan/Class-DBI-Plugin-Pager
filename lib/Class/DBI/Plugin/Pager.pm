@@ -10,7 +10,7 @@ use base qw( Data::Page Class::Data::Inheritable );
 
 use vars qw( $VERSION );
 
-$VERSION = '0.6_1';
+$VERSION = '0.6_2';
 
 # D::P inherits from Class::Accessor::Chained::Fast
 __PACKAGE__->mk_accessors( qw( _where abstract_attr per_page page _order_by _cdbi_app ) );
@@ -260,12 +260,14 @@ sub order_by {
     
     $order_by ||= $self->_order_by;
     
+    $self->_order_by( $order_by );
+    
     my @candidates = ref( $order_by ) ? @$order_by : 
                         $order_by ? ( $order_by ) : ();
 
     my %columns = $self->_real_col_names( @candidates );
     
-    return [ keys %columns ];
+    return [ map { "$_" } values %columns ];
 }
 
 sub _real_col_names {
