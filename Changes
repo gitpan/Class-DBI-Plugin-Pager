@@ -1,4 +1,9 @@
-Revision history for Perl extension Class::DBI::Plugin::Pager.
+Revision history for Class-DBI-Plugin-Pager
+
+0.52 Thu Dec 9  23:10:00 2004
+    - patch to accept order_by arguments in the
+      same way as CDBI::AbstractSearch uses (Vince Veselosky)
+    - reorganised test files a bit, added POD tests
 
 0.51 Sat Oct 23 01:31:00 2004
     - minor POD fixes, REALLY added LimitYX subclass
@@ -9,4 +14,3 @@ Revision history for Perl extension Class::DBI::Plugin::Pager.
 0.4  Fri Oct 22 00:41:07 2004
 	- original version; created by h2xs 1.21 with options
 		-XAn Class::DBI::Plugin::Pager
-

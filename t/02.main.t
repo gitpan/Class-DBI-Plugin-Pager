@@ -3,11 +3,8 @@
 use strict;
 use warnings;
 
-use Test::More tests => 18;
+use Test::More tests => 19;
 use Test::Exception;
-
-use Test::Pod::Coverage;
-pod_coverage_ok( 'Class::DBI::Plugin::Pager', 'POD coverage' );
 
 # this represents a single page of results
 my @dataset = qw( fee fi fo foo fum );
@@ -38,6 +35,14 @@ my ( $pager, @results );
 #                                                               scalar( @dataset ),
 #                                                               3,
 #                                                               ) } 'survived search_where_paged';
+
+lives_ok { ( $pager, @results ) = TestApp->pager->search_where( { this => 'that' },
+                                                                { order_by => 'fig' },
+                                                                scalar( @dataset ),
+                                                                3,
+                                                              ) } 'survived search_where';
+
+is($results[-2], '( this = ? ) ORDER BY fig LIMIT 5 OFFSET 10', 'search_where results');
 
 lives_ok { $pager = TestApp->pager } 'get pager - no args';
 

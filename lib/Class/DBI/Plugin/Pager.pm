@@ -15,11 +15,16 @@ __PACKAGE__->mk_classdata( '_pager_class' );
 
 use vars '$VERSION';
 
-$VERSION = 0.51;
+$VERSION = 0.52;
 
 =head1 NAME
 
 Class::DBI::Plugin::Pager - paged queries for CDBI
+
+=head1 DESCRIPTION
+
+Adds a pager method to your class that can query using SQL::Abstract where clauses,
+and limit the number of rows returned to a specific subset.
 
 =head1 SYNOPSIS
 
@@ -72,6 +77,8 @@ Class::DBI::Plugin::Pager - paged queries for CDBI
 
 =head1 METHODS
 
+=over
+
 =item import
 
 Loads the C<pager> method into the CDBI app.
@@ -86,7 +93,7 @@ sub import {
     my $caller;
 
     # find the app
-    foreach my $level ( 0 .. 4 )
+    foreach my $level ( 0 .. 10 )
     {
         $caller = caller( $level );
         last if UNIVERSAL::isa( $caller, 'Class::DBI' )
@@ -104,6 +111,7 @@ Also accepts named arguments:
 
     where           => $where,
     abstract_attr   => $attr,
+    order_by        => $order_by,
     per_page        => $per_page,
     page            => $page,
     syntax          => $syntax
@@ -112,6 +120,9 @@ Returns a pager object. This subclasses L<Data::Page>.
 
 Note that for positional arguments, C<$abstract_attr> can only be passed if
 preceded by a C<$where> argument.
+
+C<$abstract_attr> can contain the C<$order_by> setting (just as in
+L<SQL::Abstract|SQL::Abstract>).
 
 =over 4
 
@@ -202,6 +213,9 @@ sub _init {
         $syntax         = $args{syntax};
     }
 
+    # Emulate AbstractSearch's search_where ordering -VV 20041209
+    $order_by = delete $$abstract_attr{order_by} if ($abstract_attr and !$order_by);
+
     $self->per_page( $per_page )          if $per_page;
     $self->set_syntax( $syntax )          if $syntax;
     $self->abstract_attr( $abstract_attr )if $abstract_attr;
@@ -271,9 +285,6 @@ the results set to the required page.
 The syntax is implemented as a method called on the pager, which can be
 queried to provide the C<$rows> and C<$offset> parameters (see the subclasses
 included in this distribution).
-
-The methods return an SQL phrase that will be added to the end of the WHERE
-clause.
 
 =over 4
 
@@ -428,6 +439,7 @@ __END__
 #
 #=cut
 
+=back
 
 =head2 SUBCLASSING
 
@@ -461,6 +473,8 @@ At any rate, It Works.
 
 The subclasses implement the following LIMIT syntaxes:
 
+=over
+
 =item Class::DBI::Plugin::Pager::LimitOffset
 
     LIMIT $rows OFFSET $offset
@@ -487,6 +501,8 @@ SQLite.
     ROWS $offset TO $offset + $rows
 
 InterBase, also FireBird, maybe others?
+
+=back
 
 =head1 TODO
 

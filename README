@@ -1,16 +1,16 @@
-Class/DBI/Plugin/Pager version 0.4
-===================================
+Class-DBI-Plugin-Pager
 
-Paged search results for L<Class::DBI|Class::DBI>.
+Adds a pager method to your class that can query using SQL::Abstract
+where clauses, and limit the number of rows returned to a specific subset.
 
 INSTALLATION
 
-To install this module type the following:
+To install this module, run the following commands:
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+    perl Build.PL
+    ./Build
+    ./Build test
+    ./Build install
 
 DEPENDENCIES
 

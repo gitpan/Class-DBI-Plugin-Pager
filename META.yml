@@ -1,0 +1,31 @@
+--- #YAML:1.0
+name: Class-DBI-Plugin-Pager
+version: 0.52
+author:
+  - David Baird <cpan@riverside-cms.co.uk>
+abstract: paged queries for CDBI
+license: perl
+requires:
+  Carp: 0
+  Class::Accessor: 0
+  Class::DBI: 0.9
+  Class::DBI::Plugin::AbstractCount: 0
+  Class::Data::Inheritable: 0
+  Data::Page: 0
+  SQL::Abstract: 0
+  Test::Exception: 0
+  Test::More: 0
+  UNIVERSAL::require: 0
+provides:
+  Class::DBI::Plugin::Pager:
+    file: lib/Class/DBI/Plugin/Pager.pm
+    version: 0.52
+  Class::DBI::Plugin::Pager::LimitOffset:
+    file: lib/Class/DBI/Plugin/Pager/LimitOffset.pm
+  Class::DBI::Plugin::Pager::LimitXY:
+    file: lib/Class/DBI/Plugin/Pager/LimitXY.pm
+  Class::DBI::Plugin::Pager::LimitYX:
+    file: lib/Class/DBI/Plugin/Pager/LimitYX.pm
+  Class::DBI::Plugin::Pager::RowsTo:
+    file: lib/Class/DBI/Plugin/Pager/RowsTo.pm
+generated_by: Module::Build version 0.26
