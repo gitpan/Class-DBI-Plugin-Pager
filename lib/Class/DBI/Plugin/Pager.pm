@@ -10,7 +10,7 @@ use base qw( Data::Page Class::Data::Inheritable );
 
 use vars qw( $VERSION );
 
-$VERSION = '0.6_2';
+$VERSION = '0.6_3';
 
 # D::P inherits from Class::Accessor::Chained::Fast
 __PACKAGE__->mk_accessors( qw( _where abstract_attr per_page page _order_by _cdbi_app ) );
@@ -151,7 +151,11 @@ Defaults to the primary key(s) if not set.
 
 =item per_page
 
-Number of results per page.
+Number of results per page. 
+
+Defaults to 10, b<but> if using the positional 
+arguments style, and supplying the C<page> attribute, C<per_page> must also 
+be supplied.
 
 =item page
 
@@ -193,38 +197,49 @@ sub _init {
 
     return unless @_;
 
-    my ( $where, $abstract_attr, $order_by, $per_page, $page, $syntax );
-
-    if ( ref( $_[0] ) or $_[0] =~ /^\d+$/ )
-    {
-        $where          = shift if ref $_[0]; # SQL::Abstract accepts a hashref or an arrayref 
-        $abstract_attr  = shift if ref $_[0] eq 'HASH';
-        $order_by       = shift unless $_[0] =~ /^\d+$/;
-        $per_page       = shift if $_[0] =~ /^\d+$/;
-        $page           = shift if $_[0] =~ /^\d+$/;
-        $syntax         = shift;
-    }
-    else
-    {
-        my %args  = @_;
-
+    my ( $where, $abstract_attr, $order_by, $per_page, $page, $syntax, $named_args );
+    
+    # I wish I'd never implemented positional arguments in the first place! 
+    # Does anyone use this?
+    
+    if ( @_ % 2 == 0 )
+    {   # _might_ be named args
+        my %args = @_;
+        
         $where          = $args{where};
         $abstract_attr  = $args{abstract_attr};
         $order_by       = $args{order_by};
         $per_page       = $args{per_page};
         $page           = $args{page};
         $syntax         = $args{syntax};
+
+        $named_args = $where || $abstract_attr || $order_by 
+                            || $per_page || $page || $syntax;        
+    }
+        
+    #if ( ref( $_[0] ) or $_[0] =~ /^\d+$/ )
+    unless ( $named_args )
+    {
+        $where          = shift if ref $_[0]; # SQL::Abstract accepts a hashref or an arrayref 
+        $abstract_attr  = shift if ref $_[0] eq 'HASH';
+        $order_by       = shift if ( @_ and $_[0] !~ /^\d+$/ );
+        $per_page       = shift if ( @_ and $_[0] =~ /^\d+$/ );
+        $page           = shift if ( @_ and $_[0] =~ /^\d+$/ );
+        $syntax         = shift;
     }
 
     # Emulate AbstractSearch's search_where ordering -VV 20041209
     $order_by = delete $$abstract_attr{order_by} if ($abstract_attr and !$order_by);
+    
+    $per_page ||= $self->per_page;
+    $page     ||= $self->page;
 
-    $self->per_page( $per_page )          if $per_page;
+    $self->per_page( $per_page || 10 ); # if $per_page;
     $self->set_syntax( $syntax )          if $syntax;
     $self->abstract_attr( $abstract_attr )if $abstract_attr;
     $self->where( $where )                if $where;
     $self->order_by( $order_by )          if $order_by;
-    $self->page( $page )                  if $page;
+    $self->page( $page || 1 ); # if $page;
 }
 
 =item where( [ $where ] )
