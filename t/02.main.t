@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 20;
+use Test::More tests => 26;
 use Test::Exception;
 
 # this represents a single page of results
@@ -94,6 +94,56 @@ my @args = ( $where, $order_by, scalar( @dataset ), 3, 'RowsTo' );
 lives_ok { $pager = TestApp->pager( @args ) } 'pager - positional args';
 lives_ok { @results = $pager->search_where } 'search_where';
 is_deeply( \@results, [ @dataset, 'TestApp', '( this = ? ) ORDER BY fig ROWS 10 TO 15', 'that' ], 'RowsTo results' );
+
+# accepts arrayref 'where' clause - first with named args, then with positional
+$pager = undef;
+@results = ();
+
+
+
+$conf{ where } = [
+    age  => {'<=', 80},
+    age  => {'=>', 20},
+    city => 'Jerusalem',
+    ];
+
+
+$conf{ abstract_attr } = { logic => 'AND' };
+
+lives_ok { $pager = TestApp->pager( %conf ) } 'new pager - arrayref where (named args)';
+lives_ok { @results = $pager->search_where } 'search_where';
+is_deeply( \@results, [ @dataset, 
+			'TestApp', 
+			'( ( age <= ? ) AND ( age => ? ) AND ( city = ? ) ) ORDER BY fig LIMIT 10, 5',
+			'80', '20', 'Jerusalem',
+			], 
+			'arrayref where (named args) results' );
+
+
+
+$pager = undef;
+@results = ();
+
+# ok( @{ $conf{ where } }, 'where not eaten' );
+
+$conf{ where } = [
+    age  => {'<=', 80},
+    age  => {'=>', 20},
+    city => 'Jerusalem',
+    ];
+
+$args[0] = $conf{ where };
+
+# ok( @{ $args[0] }, 'where not eaten' );
+
+lives_ok { $pager = TestApp->pager( $args[0], { logic => 'AND' }, @args[1..$#args] ) } 'new pager - arrayref where (positional args)';
+lives_ok { @results = $pager->search_where } 'search_where';
+is_deeply( \@results, [ @dataset, 
+			'TestApp', 
+			'( ( age <= ? ) AND ( age => ? ) AND ( city = ? ) ) ORDER BY fig ROWS 10 TO 15',
+			'80', '20', 'Jerusalem',
+			], 
+			'arrayref where (positional args) results' );
 
 
 #use YAML;

@@ -10,7 +10,7 @@ use base qw( Data::Page Class::Data::Inheritable );
 
 use vars qw( $VERSION );
 
-$VERSION = 0.53;
+$VERSION = 0.54;
 
 # D::P inherits from Class::Accessor::Chained::Fast
 __PACKAGE__->mk_accessors( qw( where abstract_attr per_page page order_by _cdbi_app ) );
@@ -196,7 +196,7 @@ sub _init {
 
     if ( ref( $_[0] ) or $_[0] =~ /^\d+$/ )
     {
-        $where          = shift if ref $_[0] eq 'HASH';
+        $where          = shift if ref $_[0]; # SQL::Abstract accepts a hashref or an arrayref 
         $abstract_attr  = shift if ref $_[0] eq 'HASH';
         $order_by       = shift unless $_[0] =~ /^\d+$/;
         $per_page       = shift if $_[0] =~ /^\d+$/;
@@ -261,11 +261,11 @@ sub search_where {
 sub _setup_pager {
     my ( $self ) = @_;
 
-    my $where    = $self->where    || croak( 'must set a query before retrieving results' );
+	my $where    = $self->where    || croak( 'must set a query before retrieving results' );
     my $per_page = $self->per_page || croak( 'no. of entries per page not specified' );
     my $cdbi     = $self->_cdbi_app;
     my $count    = $cdbi->count_search_where( $where );
-    my $page     = $self->page || 1;
+	my $page     = $self->page || 1;
 
     $self->total_entries( $count );
     $self->entries_per_page( $per_page );
@@ -277,6 +277,30 @@ sub _setup_pager {
     $self->current_page( $self->first_page ) if $self->current_page < $self->first_page;
     $self->current_page( $self->last_page  ) if $self->current_page > $self->last_page;
 }
+
+# SQL::Abstract::_recurse_where eats the WHERE clause 
+#sub where {
+#	my ( $self, $where_ref ) = @_;
+#
+#	return $self->_where unless $where_ref;
+#
+#	my $where_copy;
+#
+#	if ( ref( $where_ref ) eq 'HASH' ) {
+#		$where_copy = { %$where_ref };
+#	}
+#	elsif ( ref( $where_ref ) eq 'ARRAY' )
+#	{
+#		$where_copy = [ @$where_ref ];
+#	}
+#	else
+#	{
+#		die "WHERE clause [$where_ref] must be specified as an ARRAYREF or HASHREF";
+#	}
+#
+#	# this will get eaten, but the caller's value is now protected
+#	$self->_where( $where_copy );
+#}
 
 =item set_syntax( [ $name || $class || $coderef ] )
 
