@@ -10,7 +10,7 @@ use base qw( Data::Page Class::Data::Inheritable );
 
 use vars qw( $VERSION );
 
-$VERSION = 0.54;
+$VERSION = 0.55;
 
 # D::P inherits from Class::Accessor::Chained::Fast
 __PACKAGE__->mk_accessors( qw( where abstract_attr per_page page order_by _cdbi_app ) );
@@ -258,13 +258,44 @@ sub search_where {
     return $cdbi->retrieve_from_sql( $phrase, @bind );
 }
 
+=item retrieve_all
+
+Convenience method, generates a WHERE clause that matches all rows from the table. 
+
+Accepts the same arguments as the C<pager> or C<search_where> methods, except that no 
+WHERE clause should be specified.
+
+Note that the argument parsing routine called by the C<pager> method cannot cope with 
+positional arguments that lack a WHERE clause, so either use named arguments, or the 
+'bit by bit' approach, or pass the arguments directly to C<retrieve_all>.
+
+=cut
+
+sub retrieve_all {
+	my $self = shift;
+
+	my $get_all = { 1 => 1 };
+
+    unless ( @_ ) 
+	{   # already set pager up via method calls
+		$self->where( $get_all );
+		return $self->search_where;
+	}
+    
+    my @args = ( ref( $_[0] ) or $_[0] =~ /^\d+$/ ) ?
+		( $get_all, @_ ) :          # send an array
+		( where => $get_all, @_ );  # send a hash
+
+	return $self->search_where( @args );
+}
+
 sub _setup_pager {
     my ( $self ) = @_;
 
 	my $where    = $self->where    || croak( 'must set a query before retrieving results' );
     my $per_page = $self->per_page || croak( 'no. of entries per page not specified' );
     my $cdbi     = $self->_cdbi_app;
-    my $count    = $cdbi->count_search_where( $where );
+    my $count    = $cdbi->count_search_where( $where, $self->abstract_attr );
 	my $page     = $self->page || 1;
 
     $self->total_entries( $count );

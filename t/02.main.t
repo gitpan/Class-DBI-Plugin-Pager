@@ -3,8 +3,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 26;
+use Test::More tests => 31;
 use Test::Exception;
+
+# use Data::Dumper::Simple;
 
 # this represents a single page of results
 my @dataset = qw( fee fi fo foo fum );
@@ -145,6 +147,27 @@ is_deeply( \@results, [ @dataset,
 			], 
 			'arrayref where (positional args) results' );
 
+
+
+# retrieve_all
+
+$pager = undef;
+@results = ();
+
+@args = ( $order_by, scalar( @dataset ), 3, 'RowsTo' );
+
+lives_ok { $pager = TestApp->pager } 'no args constructor';
+lives_ok { @results = $pager->retrieve_all( @args ) } '@args passed to retrieve_all';
+is_deeply( \@results, [ @dataset, 'TestApp', '( 1 = ? ) ORDER BY fig ROWS 10 TO 15', '1' ], 'retrieve_all results' );
+
+$pager = TestApp->pager;
+$pager->order_by( $order_by );
+$pager->per_page( scalar( @dataset ) );
+$pager->page( 3 );
+$pager->set_syntax( 'RowsTo' );
+
+lives_ok { @results = $pager->retrieve_all } 'retrieve_all without args';
+is_deeply( \@results, [ @dataset, 'TestApp', '( 1 = ? ) ORDER BY fig ROWS 10 TO 15', '1' ], 'retrieve_all results' );
 
 #use YAML;
 #warn Dump( $pager );

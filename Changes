@@ -1,5 +1,10 @@
 Revision history for Class-DBI-Plugin-Pager
 
+0.55  Sat Jan 15 00:50:00 2005
+    - fixed _setup_pager() to pass $self->abstract_attr in the 
+      count_search_where() call (reported by forehead)
+    - added retrieve_all() method (requested by forehead)
+
 0.54  Fri Jan 14 23:10:00 2005
     - can now pass the where clause as an ARRAYREF when using 
       positional arguments (reported by Gabor Szabo)
