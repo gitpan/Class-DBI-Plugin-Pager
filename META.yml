@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: Class-DBI-Plugin-Pager
-version: 0.55
+version: 0.6_1
 author:
   - David Baird <cpan@riverside-cms.co.uk>
 abstract: paged queries for CDBI
@@ -18,7 +18,7 @@ requires:
 provides:
   Class::DBI::Plugin::Pager:
     file: lib/Class/DBI/Plugin/Pager.pm
-    version: 0.55
+    version: 0.6_1
   Class::DBI::Plugin::Pager::LimitOffset:
     file: lib/Class/DBI/Plugin/Pager/LimitOffset.pm
   Class::DBI::Plugin::Pager::LimitXY:
@@ -27,4 +27,4 @@ provides:
     file: lib/Class/DBI/Plugin/Pager/LimitYX.pm
   Class::DBI::Plugin::Pager::RowsTo:
     file: lib/Class/DBI/Plugin/Pager/RowsTo.pm
-generated_by: Module::Build version 0.2606
+generated_by: Module::Build version 0.2609

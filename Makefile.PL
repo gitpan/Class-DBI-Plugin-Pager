@@ -5,15 +5,15 @@ WriteMakefile
           'NAME' => 'Class::DBI::Plugin::Pager',
           'VERSION_FROM' => 'lib/Class/DBI/Plugin/Pager.pm',
           'PREREQ_PM' => {
-                           'Carp' => 0,
+                           'Carp' => '0',
                            'Class::DBI' => '0.9',
-                           'Class::DBI::Plugin::AbstractCount' => 0,
-                           'Class::Data::Inheritable' => 0,
-                           'Data::Page' => 2,
-                           'SQL::Abstract' => 0,
-                           'Test::Exception' => 0,
-                           'Test::More' => 0,
-                           'UNIVERSAL::require' => 0
+                           'Class::DBI::Plugin::AbstractCount' => '0',
+                           'Class::Data::Inheritable' => '0',
+                           'Data::Page' => '2',
+                           'SQL::Abstract' => '0',
+                           'Test::Exception' => '0',
+                           'Test::More' => '0',
+                           'UNIVERSAL::require' => '0'
                          },
           'INSTALLDIRS' => 'site',
           'PL_FILES' => {}
