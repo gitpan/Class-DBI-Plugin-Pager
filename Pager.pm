@@ -15,7 +15,7 @@ __PACKAGE__->mk_classdata( '_pager_class' );
 
 use vars '$VERSION';
 
-$VERSION = 0.4;
+$VERSION = 0.5;
 
 =head1 NAME
 
@@ -119,32 +119,36 @@ preceded by a C<$where> argument.
 
 The named arguments all exist as get/set methods.
 
-B<where>
+=over 4
+
+=item where
 
 A hashref specifying the query. See L<SQL::Abstract|SQL::Abstract>.
 
-B<abstract_attr>
+=item abstract_attr
 
 A hashref specifying extra options to be passed through to the
 L<SQL::Abstract|SQL::Abstract> constructor.
 
-B<order_by>
+=item order_by
 
 Single column name or arrayref of column names for the ORDER BY clause.
 Defaults to the primary key(s) if not set.
 
-C<per_page>
+=item per_page
 
 Number of results per page.
 
-C<page>
+=item page
 
 The pager will retrieve results just for this page. Defaults to 1.
 
-C<syntax>
+=item syntax
 
 Change the way the 'limit' clause is constructed. See C<set_syntax>. Default
 is C<LimitOffset>.
+
+=back
 
 =back
 
@@ -206,7 +210,7 @@ sub _init {
     $self->page( $page )                  if $page;
 }
 
-=item search_where( $where, [ $attr ] )
+=item search_where
 
 Retrieves results from the pager. Accepts the same arguments as the C<pager>
 method.
@@ -264,26 +268,36 @@ sub _setup_pager {
 Changes the syntax used to generate the C<limit> or other phrase that restricts
 the results set to the required page.
 
-B<$class>
+The syntax is implemented as a method called on the pager, which can be
+queried to provide the C<$rows> and C<$offset> parameters (see the subclasses
+included in this distribution).
 
-A class with a C<make_limit> method. Accepts C<$offset, $rows> arguments.
-Returns an SQL phrase that will be added to the end of the WHERE clause.
+The methods return an SQL phrase that will be added to the end of the WHERE
+clause.
 
-B<$name>
+=over 4
+
+=item $class
+
+A class with a C<make_limit> method.
+
+=item $name
 
 Name of a class in the C<Class::DBI::Plugin::Pager::> namespace, which has a
-C<make_limit> method as above.
+C<make_limit> method.
 
-B<$coderef>
+=item $coderef
 
-Accepts arguments C<$offset, $rows>. This will be called as a method on the
-pager, so it will also receive the pager as a first argument.
+Will be called as a method on the pager object, so receives the pager as its
+argument.
 
-B<no args>
+=item (no args)
 
 Called without args, will default to C<LimitOffset>, which causes
 L<Class::DBI::Plugin::Pager::LimitOffset|Class::DBI::Plugin::Pager::LimitOffset>
 to be used.
+
+=back
 
 =cut
 
@@ -316,7 +330,7 @@ sub set_syntax {
 This is called automatically when you call C<pager>, and attempts to set the
 syntax automatically.
 
-If you are using a subclass of the pager, this will not get called.
+If you are using a subclass of the pager, this method will not be called.
 
 Will C<die> if using Oracle or DB2, since there is no simple syntax for limiting
 the results set. DB2 has a C<FETCH> keyword, but that seems to apply to a
@@ -335,10 +349,7 @@ Supports the following drivers:
 
 Older versions of MySQL should use the LimitXY syntax. You'll need to set it
 manually, either by C<use CDBI::P::Pager::LimitXY>, or by passing
-C<syntax => 'LimitXY'> to a method call, or call C<set_syntax> directly.
-
-I don't know if there are drivers for InterBase or FireBird, but if there are,
-they use the ROWS .. TO .. syntax and it should work.
+C<syntax =E<gt> 'LimitXY'> to a method call, or call C<set_syntax> directly.
 
 Any driver not in the supported or unsupported lists defaults to LimitOffset.
 
@@ -376,6 +387,48 @@ sub auto_set_syntax {
 
 __END__
 
+#=for notes
+#
+#Would this work?
+#
+#with $limit and $offset defined.
+#
+#my $last = $limit + $offset
+#
+#my $order_by_str = join( ', ', @$order_by )
+#
+#$cdbi->set_sql( emulate_limit => <<'');
+#    SELECT * FROM (
+#        SELECT TOP $limit * FROM (
+#            SELECT TOP $last __ESSENTIAL__
+#            FROM __TABLE__
+#            ORDER BY $order_by_str ASC
+#        ) AS foo ORDER BY $order_by_str DESC
+#    ) AS bar ORDER BY $order_by_str ASC
+#
+#
+#e.g. MS Access (thanks Emanuele Zeppieri)
+#
+#to add LIMIT/OFFSET to this query:
+#
+#SELECT my_column
+#FROM my_table
+#ORDER BY my_column ASC
+#
+#say with the values LIMIT=5 OFFSET=10, you have to resort to the TOP
+#clause and re-write it this way:
+#
+#SELECT * FROM (
+#	SELECT TOP 5 * FROM (
+#		SELECT TOP 15 my_column
+#		FROM my_table
+#		ORDER BY my_column ASC
+#	) AS foo ORDER BY my_column DESC
+#) AS bar ORDER BY my_column ASC
+#
+#=cut
+
+
 =head2 SUBCLASSING
 
 The 'limit' syntax can be set by using a subclass, e.g.
@@ -401,9 +454,10 @@ instead of setting at runtime. A subclass looks like this:
     1;
 
 You can omit the C<use base> and switch syntax by calling
-C<$pager->set_syntax( 'RowsTo' )>. Or you can leave in the C<use base> and
-still say C<$pager->set_syntax( 'RowsTo' )>, because in this case the class is
-C<require>d and the C<import> in the base class doesn't get called.
+C<$pager-E<gt>set_syntax( 'RowsTo' )>. Or you can leave in the C<use base> and
+still say C<$pager-E<gt>set_syntax( 'RowsTo' )>, because in this case the class is
+C<require>d and the C<import> in the base class doesn't get called. Or something.
+At any rate, It Works.
 
 The subclasses implement the following LIMIT syntaxes:
 
@@ -411,16 +465,16 @@ The subclasses implement the following LIMIT syntaxes:
 
     LIMIT $rows OFFSET $offset
 
-This is the default i.e. you can just say C<use Class::DBI::Plugin::Pager> to
-get this syntax.
+This is the default if your driver is not in the list of known drivers.
 
-This should work for PostgreSQL, more recent MySQL, and some others.
+This should work for PostgreSQL, more recent MySQL, SQLite, and maybe some
+others.
 
 =item Class::DBI::Plugin::LimitXY
 
     LIMIT $offset, $rows
 
-I think this syntax is only used by older versions of MySQL.
+I think this syntax is only used by older versions of MySQL, or by SQLite.
 
 =item Class::DBI::Plugin::RowsTo
 
@@ -433,19 +487,23 @@ InterBase, also FireBird, maybe others?
 I've only used this on an older version of MySQL. Reports of this thing
 working (or not) elsewhere would be useful.
 
+It should be possible to use C<set_sql> to build the complex queries
+required by some databases to emulate LIMIT (see notes in source).
+
 =head1 CAVEATS
 
 This class can't implement the subselect mechanism required by some databases
 to emulate the LIMIT phrase, because it only has access to the WHERE clause,
-not the whole SQL statement.
+not the whole SQL statement. At the moment.
 
 Each query issues two requests to the database - the first to count the entire
 result set, the second to retrieve the required subset of results. If your
 tables are small it may be quicker to use L<Class::DBI::Pager|Class::DBI::Pager>.
 
-The C<order_by> clause means the database has to retrieve and sort the
-entire results set, before chopping out the requested subset. It's probably a
-good idea to have an index on the column(s) used to order the results.
+The C<order_by> clause means the database has to retrieve (internally) and sort
+the entire results set, before chopping out the requested subset. It's probably
+a good idea to have an index on the column(s) used to order the results. For
+huge tables, this approach to paging may be too inefficient.
 
 =head1 DEPENDENCIES
 
@@ -476,8 +534,4 @@ it under the same terms as Perl itself.
 =head1 AUTHOR
 
 David Baird, C<cpan@riverside-cms.co.uk>
-
-
-
-
 
