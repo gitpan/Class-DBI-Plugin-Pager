@@ -10,10 +10,10 @@ use base qw( Data::Page Class::Data::Inheritable );
 
 use vars qw( $VERSION );
 
-$VERSION = '0.6_4';
+$VERSION = 0.56;
 
 # D::P inherits from Class::Accessor::Chained::Fast
-__PACKAGE__->mk_accessors( qw( _where abstract_attr per_page page _order_by _cdbi_app ) );
+__PACKAGE__->mk_accessors( qw( where abstract_attr per_page page order_by _cdbi_app ) );
 
 __PACKAGE__->mk_classdata( '_syntax' );
 __PACKAGE__->mk_classdata( '_pager_class' );
@@ -34,7 +34,6 @@ and limit the number of rows returned to a specific subset.
     use base 'Class::DBI';
 
     use Class::DBI::Plugin::AbstractCount;      # pager needs this
-    
     use Class::DBI::Plugin::Pager;
 
     # or to use a different syntax
@@ -95,14 +94,15 @@ sub import {
 
     my $caller;
 
-    # find the app
+    # find the app - supports subclassing (My::Pager is_a CDBI::P::Pager, not_a CDBI)
     foreach my $level ( 0 .. 10 )
     {
         $caller = caller( $level );
         last if UNIVERSAL::isa( $caller, 'Class::DBI' )
     }
 
-    croak( "can't find the CDBI app" ) unless $caller;
+    warn( "can't find the CDBI app" ), return unless $caller; 
+    #croak( "can't find the CDBI app" ) unless $caller;
 
     no strict 'refs';
     *{"$caller\::pager"} = \&pager;
@@ -151,11 +151,7 @@ Defaults to the primary key(s) if not set.
 
 =item per_page
 
-Number of results per page. 
-
-Defaults to 10, b<but> if using the positional 
-arguments style, and supplying the C<page> attribute, C<per_page> must also 
-be supplied.
+Number of results per page.
 
 =item page
 
@@ -197,132 +193,39 @@ sub _init {
 
     return unless @_;
 
-    my ( $where, $abstract_attr, $order_by, $per_page, $page, $syntax, $named_args );
-    
-    # I wish I'd never implemented positional arguments in the first place! 
-    # Does anyone use this?
-    
-    if ( @_ % 2 == 0 )
-    {   # _might_ be named args
-        my %args = @_;
-        
+    my ( $where, $abstract_attr, $order_by, $per_page, $page, $syntax );
+
+    if ( ref( $_[0] ) or $_[0] =~ /^\d+$/ )
+    {
+        $where          = shift if ref $_[0]; # SQL::Abstract accepts a hashref or an arrayref 
+        $abstract_attr  = shift if ref $_[0] eq 'HASH';
+        $order_by       = shift unless $_[0] =~ /^\d+$/;
+        $per_page       = shift if $_[0] =~ /^\d+$/;
+        $page           = shift if $_[0] =~ /^\d+$/;
+        $syntax         = shift;
+    }
+    else
+    {
+        my %args  = @_;
+
         $where          = $args{where};
         $abstract_attr  = $args{abstract_attr};
         $order_by       = $args{order_by};
         $per_page       = $args{per_page};
         $page           = $args{page};
         $syntax         = $args{syntax};
-
-        $named_args = $where || $abstract_attr || $order_by 
-                            || $per_page || $page || $syntax;        
-    }
-        
-    #if ( ref( $_[0] ) or $_[0] =~ /^\d+$/ )
-    unless ( $named_args )
-    {
-        $where          = shift if ref $_[0]; # SQL::Abstract accepts a hashref or an arrayref 
-        $abstract_attr  = shift if ref $_[0] eq 'HASH';
-        $order_by       = shift if ( @_ and $_[0] !~ /^\d+$/ );
-        $per_page       = shift if ( @_ and $_[0] =~ /^\d+$/ );
-        $page           = shift if ( @_ and $_[0] =~ /^\d+$/ );
-        $syntax         = shift;
     }
 
     # Emulate AbstractSearch's search_where ordering -VV 20041209
     $order_by = delete $$abstract_attr{order_by} if ($abstract_attr and !$order_by);
-    
-    $per_page ||= $self->per_page;
-    $page     ||= $self->page;
 
-    $self->per_page( $per_page || 10 ); # if $per_page;
+    $self->per_page( $per_page )          if $per_page;
     $self->set_syntax( $syntax )          if $syntax;
     $self->abstract_attr( $abstract_attr )if $abstract_attr;
     $self->where( $where )                if $where;
     $self->order_by( $order_by )          if $order_by;
-    $self->page( $page || 1 ); # if $page;
+    $self->page( $page )                  if $page;
 }
-
-=item where( [ $where ] )
-
-Translates accessor names into column names (or is it vice versa?). The 
-original C<$where> can be retrieved via C<_where()>.
-
-=cut
-
-sub where {
-    my ( $self, $where ) = @_;
-    
-    $where ||= $self->_where;
-     
-    $self->_where( $where );
-    
-    my %columns = $self->_real_col_names( keys %$where );
-    
-    # keys are candidates, values are real names
-    my %munged_where = map { $columns{ $_ } => $where->{ $_ } } keys %columns; 
-    
-    return \%munged_where;
-}
-
-=item order_by( [ $order_by ] )
-
-Does the same translation as C<where()>.
-
-=cut
-
-sub order_by {
-    my ( $self, $order_by ) = @_;
-    
-    $order_by ||= $self->_order_by;
-    
-    $self->_order_by( $order_by );
-    
-    my @candidates = ref( $order_by ) ? @$order_by : 
-                        $order_by ? ( $order_by ) : ();
-
-    my %columns = $self->_real_col_names( @candidates );
-    
-    return [ map { "$_" } values %columns ];
-}
-
-sub _real_col_names {
-    my ( $self, @candidates ) = @_;
-    
-    my $cdbi = $self->_cdbi_app;
-    
-    my %cols = ();
-    
-    foreach my $candidate ( @candidates )
-    {
-        # lifted from Class::DBI::Plugin::CountSearch
-        my $column = $cdbi->find_column( $candidate )
-            || ( List::Util::first { $_->accessor eq $candidate } $cdbi->columns )
-            || $cdbi->_croak("'$candidate' is not a column of $cdbi");    
-        
-        $cols{ $candidate } = $column;
-    }
-    
-    return %cols;    
-}
-
-=item add_attr( %attributes )
-
-Add to (or override) the L<SQL::Abstract|SQL::Abstract> attributes: 
-
-    $pager->add_attr( cmp => 'like' );
-    
-=cut
-
-sub add_attr {
-    my ( $self, %attr ) = @_;
-   
-    my $abs_attr = $self->abstract_attr;
-    
-    $abs_attr->{ $_ } = $attr{ $_ } for keys %attr;
-    
-    $self->abstract_attr( $abs_attr );
-}
-    
 
 =item search_where
 
@@ -370,44 +273,31 @@ positional arguments that lack a WHERE clause, so either use named arguments, or
 =cut
 
 sub retrieve_all {
-        my $self = shift;
+	my $self = shift;
 
-        my $get_all = { 1 => 1 };
+	my $get_all = { 1 => 1 };
 
     unless ( @_ ) 
-        {   # already set pager up via method calls
-                $self->where( $get_all );
-                return $self->search_where;
-        }
+	{   # already set pager up via method calls
+		$self->where( $get_all );
+		return $self->search_where;
+	}
     
     my @args = ( ref( $_[0] ) or $_[0] =~ /^\d+$/ ) ?
-                ( $get_all, @_ ) :          # send an array
-                ( where => $get_all, @_ );  # send a hash
+		( $get_all, @_ ) :          # send an array
+		( where => $get_all, @_ );  # send a hash
 
-        return $self->search_where( @args );
-}
-
-=item retrieve_all_sorted_by( $order )
-
-Useful for L<Maypole|Maypole>. 
-
-=cut
-
-sub retrieve_all_sorted_by {
-    my ( $self, $order ) = @_;
-    
-    return $self->retrieve_all( { order_by => $order } );
+	return $self->search_where( @args );
 }
 
 sub _setup_pager {
     my ( $self ) = @_;
 
-    my $where    = $self->where    || croak( 'must set a query before retrieving results' );
+	my $where    = $self->where    || croak( 'must set a query before retrieving results' );
     my $per_page = $self->per_page || croak( 'no. of entries per page not specified' );
     my $cdbi     = $self->_cdbi_app;
     my $count    = $cdbi->count_search_where( $where, $self->abstract_attr );
-    #my $count    = $self->_get_count;
-    my $page     = $self->page || 1;
+	my $page     = $self->page || 1;
 
     $self->total_entries( $count );
     $self->entries_per_page( $per_page );
@@ -419,50 +309,6 @@ sub _setup_pager {
     $self->current_page( $self->first_page ) if $self->current_page < $self->first_page;
     $self->current_page( $self->last_page  ) if $self->current_page > $self->last_page;
 }
-
-
-
-#sub _get_count {
-#    my ( $self ) = @_;
-#
-#    my $where = $self->where || croak( 'must set a query before retrieving results' );
-#    my $cdbi  = $self->_cdbi_app;
-#    
-#    # Class::DBI::Plugin::AbstractCount can handle SQL::Abstract attributes
-#    return $cdbi->count_search_where( $where, $self->abstract_attr ) 
-#        if $cdbi->can( 'count_search_where' );
-#        
-#    # Class::DBI::Plugin::CountSearch correctly handles aliased column accessors 
-#    # (i.e. accessors for columns where the accessor has a different name from the 
-#    # column). But it can't handle SQL::Abstract attributes. 
-#    croak( 'no way to count total entries' ) unless $cdbi->can( 'count_search' );
-#    
-#    croak( 'Class::DBI::Plugin::CountSearch does not handle SQL::Abstract attributes - '
-#            . 'use Class::DBI::Plugin::AbstractCount instead' )
-#        if $self->abstract_attr;
-#        
-#    my @cols = keys %$where;
-#    
-#    croak('no keys in where clause') unless @cols > 0;
-#    
-#    # unqualified count
-#    return $cdbi->count_search if ( @cols == 1 and $cols[0] eq '1' );
-#    
-#    # count with search fields
-#    my @args;
-#    
-#    foreach my $col ( @cols )
-#    {
-#        my $expr = $where->{$col};
-#        
-#        croak( "code doesn't handle anything but 'like'!" )
-#            unless keys %$expr == 1 and $expr->{like};
-#        
-#        push @args, $col => $expr->{like};
-#    }
-#   
-#    return $cdbi->count_search_like( @args );
-#}
 
 # SQL::Abstract::_recurse_where eats the WHERE clause 
 #sub where {
@@ -561,13 +407,13 @@ should probably be others to add to the unsupported list.
 
 Supports the following drivers:
 
-                    DRIVER        CDBI::P::Pager subclass
+                      DRIVER        CDBI::P::Pager subclass
     my %supported = ( pg        => 'LimitOffset',
-                    mysql     => 'LimitOffset', # older versions need LimitXY
-                    sqlite    => 'LimitOffset', # or LimitYX
-                    interbase => 'RowsTo',
-                    firebird  => 'RowsTo',
-                    );
+                      mysql     => 'LimitOffset', # older versions need LimitXY
+                      sqlite    => 'LimitOffset', # or LimitYX
+                      interbase => 'RowsTo',
+                      firebird  => 'RowsTo',
+                      );
 
 Older versions of MySQL should use the LimitXY syntax. You'll need to set it
 manually, either by C<use CDBI::P::Pager::LimitXY>, or by passing
@@ -584,16 +430,16 @@ sub auto_set_syntax {
 
     # not an exhaustive list
     my %not_supported = ( oracle => 'Oracle',
-                        db2    => 'DB2',
-                        );
+                          db2    => 'DB2',
+                          );
 
     # additions welcome
     my %supported = ( pg        => 'LimitOffset',
-                    mysql     => 'LimitOffset', # older versions need LimitXY
-                    sqlite    => 'LimitOffset', # or LimitYX
-                    interbase => 'RowsTo',
-                    firebird  => 'RowsTo',
-                    );
+                      mysql     => 'LimitOffset', # older versions need LimitXY
+                      sqlite    => 'LimitOffset', # or LimitYX
+                      interbase => 'RowsTo',
+                      firebird  => 'RowsTo',
+                      );
 
     my $cdbi = $self->_cdbi_app;
 
@@ -727,7 +573,7 @@ required by some databases to emulate LIMIT (see notes in source).
 
 This class can't implement the subselect mechanism required by some databases
 to emulate the LIMIT phrase, because it only has access to the WHERE clause,
-not the whole SQL statement. At the moment. Integration with L<SQL::Abstract::Limit|SQL::Abstract::Limit> is on the horizon. 
+not the whole SQL statement. At the moment.
 
 Each query issues two requests to the database - the first to count the entire
 result set, the second to retrieve the required subset of results. If your
@@ -750,10 +596,7 @@ L<Carp|Carp>.
 =head1 SEE ALSO
 
 L<Class::DBI::Pager|Class::DBI::Pager> does a similar job, but retrieves
-data representing the entire results set into memory before chopping out the 
-page you want. This is often not going to be a problem, since the data are 
-only the primary key IDs. I'd recommend careful benchmarking before deciding 
-which pager to use (and I'd be interested in seeing anyone's benchmarks). 
+the entire results set into memory before chopping out the page you want.
 
 =head1 BUGS
 

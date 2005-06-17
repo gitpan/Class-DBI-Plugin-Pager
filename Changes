@@ -1,29 +1,10 @@
 Revision history for Class-DBI-Plugin-Pager
 
-0.6_4 Wed Apr  6 24:15:00 2005
-    - POD updates
-
-0.6_3 Wed Apr  6 23:45:00 2005
-    - added tests to check argument parsing (07.args.t)
-    - fixed minor bugs in argument parsing
-
-0.6_2 Wed Apr  6 21:50:00 2005
-    - new tests (06.alias.t) revealed bugs in where() and order_by()
-
-0.6_1 Wed Apr  6 17:20:00 2005
-    - removed ability to use Class::DBI::Plugin::CountSearch instead 
-        of Class::DBI::Plugin::AbstractCount to count results
-    - added detection of column aliases (stolen from Class::DBI::Plugin::CountSearch)
-    - lots of tests are now broken because the hackery used in the old tests to pretend 
-        to be a CDBI subclass can't support column aliases
-    - some new tests added, only supported with CDBI::mysql
-
-0.56  Wed Apr  6 14:30:00 2005
-    - (this version was never uploaded to CPAN)
-    - added retrieve_all_sorted_by() method (Dave Howarth)
-    - added ability to use Class::DBI::Plugin::CountSearch instead 
-        of Class::DBI::Plugin::AbstractCount to count results
-        set (Dave Howarth)
+0.56  Fri June 17 09:45:00 2005
+    - don't die, just warn (and don't install pager() method) in import()
+        if can't find the CDBI class (Chia-liang Kao - making it safe for 
+        perl -MClass::DBI::Plugin::Pager which some system uses to check if 
+        a module can be loaded). 
 
 0.55  Sat Jan 15 00:50:00 2005
     - fixed _setup_pager() to pass $self->abstract_attr in the 
