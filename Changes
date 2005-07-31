@@ -1,5 +1,14 @@
 Revision history for Class-DBI-Plugin-Pager
 
+0.561 Sun July 31 15:10:00 2005
+    - avoid bug in Class::DBI::Plugin::AbstractCount 0.04 which dies if a WHERE clause 
+        includes keys that are not columns (specifically,  { 1 => 1 } ) (patch from 
+        Will Hawes)
+    - unspecified WHERE clause defaults to {} (equivalent to { 1 => 1 }, i.e. retrieve all)
+    - fixed warnings issued when less than a full set of positional arguments 
+        are supplied - reported by Ask Bjorn Hansen
+    - new dependency on Test::Warn
+
 0.56  Fri June 17 09:45:00 2005
     - don't die, just warn (and don't install pager() method) in import()
         if can't find the CDBI class (Chia-liang Kao - making it safe for 

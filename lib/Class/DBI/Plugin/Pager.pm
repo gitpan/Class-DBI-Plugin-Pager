@@ -10,7 +10,7 @@ use base qw( Data::Page Class::Data::Inheritable );
 
 use vars qw( $VERSION );
 
-$VERSION = 0.56;
+$VERSION = 0.561;
 
 # D::P inherits from Class::Accessor::Chained::Fast
 __PACKAGE__->mk_accessors( qw( where abstract_attr per_page page order_by _cdbi_app ) );
@@ -199,9 +199,12 @@ sub _init {
     {
         $where          = shift if ref $_[0]; # SQL::Abstract accepts a hashref or an arrayref 
         $abstract_attr  = shift if ref $_[0] eq 'HASH';
-        $order_by       = shift unless $_[0] =~ /^\d+$/;
-        $per_page       = shift if $_[0] =~ /^\d+$/;
-        $page           = shift if $_[0] =~ /^\d+$/;
+#        $order_by       = shift unless $_[0] =~ /^\d+$/;
+#        $per_page       = shift if $_[0] =~ /^\d+$/;
+#        $page           = shift if $_[0] =~ /^\d+$/;
+        $order_by       = shift unless $_[0] and $_[0] =~ /^\d+$/;
+        $per_page       = shift if $_[0] and $_[0] =~ /^\d+$/;
+        $page           = shift if $_[0] and $_[0] =~ /^\d+$/;         
         $syntax         = shift;
     }
     else
@@ -252,6 +255,15 @@ sub search_where {
 
     $order_by = [ $order_by ] unless ref $order_by;
     my ( $phrase, @bind ) = $sql->where( $where, $order_by );
+    
+    # If the phrase starts with the ORDER clause (i.e. no WHERE spec), then we are 
+    # emulating a { 1 => 1 } search, but avoiding the bug in Class::DBI::Plugin::AbstractCount 0.04,
+    # so we need to replace the spec - patch from Will Hawes
+    if ( $phrase =~ /^\s*ORDER\s*/i ) 
+    {
+        $phrase = ' 1=1' . $phrase;
+    }
+    
 
     $phrase .= ' ' . $limit_phrase;
     $phrase =~ s/^\s*WHERE\s*//i;
@@ -272,32 +284,43 @@ positional arguments that lack a WHERE clause, so either use named arguments, or
 
 =cut
 
-sub retrieve_all {
-	my $self = shift;
+sub retrieve_all 
+{
+    my $self = shift;
 
-	my $get_all = { 1 => 1 };
+    my $get_all = {}; # { 1 => 1 };
 
     unless ( @_ ) 
-	{   # already set pager up via method calls
-		$self->where( $get_all );
-		return $self->search_where;
-	}
+    {   # already set pager up via method calls
+            $self->where( $get_all );
+            return $self->search_where;
+    }
     
     my @args = ( ref( $_[0] ) or $_[0] =~ /^\d+$/ ) ?
-		( $get_all, @_ ) :          # send an array
-		( where => $get_all, @_ );  # send a hash
+                ( $get_all, @_ ) :          # send an array
+                ( where => $get_all, @_ );  # send a hash
 
-	return $self->search_where( @args );
+    return $self->search_where( @args );
 }
 
-sub _setup_pager {
+sub _setup_pager 
+{
     my ( $self ) = @_;
 
-	my $where    = $self->where    || croak( 'must set a query before retrieving results' );
+    my $where = $self->where || {}; 
+    
+    # fix { 1 => 1 } as a special case - Class::DBI::Plugin::AbstractCount 0.04 has a bug in 
+    # its column-checking code
+    if ( ref( $where ) eq 'HASH' and $where->{1} )
+    {
+        $where = {};
+        $self->where( {} );
+    }    
+    
     my $per_page = $self->per_page || croak( 'no. of entries per page not specified' );
     my $cdbi     = $self->_cdbi_app;
     my $count    = $cdbi->count_search_where( $where, $self->abstract_attr );
-	my $page     = $self->page || 1;
+    my $page     = $self->page || 1;
 
     $self->total_entries( $count );
     $self->entries_per_page( $per_page );
@@ -411,6 +434,7 @@ Supports the following drivers:
     my %supported = ( pg        => 'LimitOffset',
                       mysql     => 'LimitOffset', # older versions need LimitXY
                       sqlite    => 'LimitOffset', # or LimitYX
+                      sqlite2   => 'LimitOffset', # or LimitYX
                       interbase => 'RowsTo',
                       firebird  => 'RowsTo',
                       );
@@ -437,6 +461,7 @@ sub auto_set_syntax {
     my %supported = ( pg        => 'LimitOffset',
                       mysql     => 'LimitOffset', # older versions need LimitXY
                       sqlite    => 'LimitOffset', # or LimitYX
+                      sqlite2   => 'LimitOffset', # or LimitYX
                       interbase => 'RowsTo',
                       firebird  => 'RowsTo',
                       );
@@ -447,6 +472,8 @@ sub auto_set_syntax {
 
     die __PACKAGE__ . " can't build limit clauses for $not_supported{ $driver }"
         if $not_supported{ $driver };
+        
+    #warn sprintf "Setting syntax to %s for $driver", $supported{ $driver } || 'LimitOffset';
 
     $self->set_syntax( $supported{ $driver } || 'LimitOffset' );
 }

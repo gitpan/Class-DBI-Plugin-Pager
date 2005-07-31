@@ -13,6 +13,7 @@ WriteMakefile
                            'SQL::Abstract' => '0',
                            'Test::Exception' => '0',
                            'Test::More' => '0',
+                           'Test::Warn' => '0',
                            'UNIVERSAL::require' => '0'
                          },
           'INSTALLDIRS' => 'site',

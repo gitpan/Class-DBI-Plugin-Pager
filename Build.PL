@@ -9,6 +9,7 @@ my $builder = Module::Build->new(
     dist_version_from   => 'lib/Class/DBI/Plugin/Pager.pm',
     requires => { 'Test::More' => 0,
                   'Test::Exception' => 0,
+                  'Test::Warn' => 0,
                   'Class::DBI' => 0.90,
                   'SQL::Abstract' => 0,
                   'Data::Page' => 2,

@@ -158,7 +158,8 @@ $pager = undef;
 
 lives_ok { $pager = TestApp->pager } 'no args constructor';
 lives_ok { @results = $pager->retrieve_all( @args ) } '@args passed to retrieve_all';
-is_deeply( \@results, [ @dataset, 'TestApp', '( 1 = ? ) ORDER BY fig ROWS 10 TO 15', '1' ], 'retrieve_all results' );
+#is_deeply( \@results, [ @dataset, 'TestApp', '( 1 = ? ) ORDER BY fig ROWS 10 TO 15', '1' ], 'retrieve_all results' );
+is_deeply( \@results, [ @dataset, 'TestApp', ' 1=1 ORDER BY fig ROWS 10 TO 15' ], 'retrieve_all results' );
 
 $pager = TestApp->pager;
 $pager->order_by( $order_by );
@@ -167,7 +168,8 @@ $pager->page( 3 );
 $pager->set_syntax( 'RowsTo' );
 
 lives_ok { @results = $pager->retrieve_all } 'retrieve_all without args';
-is_deeply( \@results, [ @dataset, 'TestApp', '( 1 = ? ) ORDER BY fig ROWS 10 TO 15', '1' ], 'retrieve_all results' );
+#is_deeply( \@results, [ @dataset, 'TestApp', '( 1 = ? ) ORDER BY fig ROWS 10 TO 15', '1' ], 'retrieve_all results' );
+is_deeply( \@results, [ @dataset, 'TestApp', ' 1=1 ORDER BY fig ROWS 10 TO 15' ], 'retrieve_all results' );
 
 #use YAML;
 #warn Dump( $pager );
