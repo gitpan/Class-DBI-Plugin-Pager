@@ -10,7 +10,7 @@ sub make_limit {
     my $offset = $self->skipped;
     my $rows   = $self->entries_per_page;
 
-    "LIMIT $rows OFFSET $offset";
+    return "LIMIT $rows OFFSET $offset";
 }
 
 1;

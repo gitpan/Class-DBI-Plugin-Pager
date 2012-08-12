@@ -105,7 +105,7 @@ $pager = undef;
 
 $conf{ where } = [
     age  => {'<=', 80},
-    age  => {'=>', 20},
+    age  => {'>=', 20},
     city => 'Jerusalem',
     ];
 
@@ -115,11 +115,11 @@ $conf{ abstract_attr } = { logic => 'AND' };
 lives_ok { $pager = TestApp->pager( %conf ) } 'new pager - arrayref where (named args)';
 lives_ok { @results = $pager->search_where } 'search_where';
 is_deeply( \@results, [ @dataset, 
-			'TestApp', 
-			'( ( age <= ? ) AND ( age => ? ) AND ( city = ? ) ) ORDER BY fig LIMIT 10, 5',
-			'80', '20', 'Jerusalem',
-			], 
-			'arrayref where (named args) results' );
+            'TestApp', 
+            '( ( age <= ? AND age >= ? AND city = ? ) ) ORDER BY fig LIMIT 10, 5',
+            '80', '20', 'Jerusalem',
+            ], 
+            'arrayref where (named args) results' );
 
 
 
@@ -130,7 +130,7 @@ $pager = undef;
 
 $conf{ where } = [
     age  => {'<=', 80},
-    age  => {'=>', 20},
+    age  => {'>=', 20},
     city => 'Jerusalem',
     ];
 
@@ -141,11 +141,11 @@ $args[0] = $conf{ where };
 lives_ok { $pager = TestApp->pager( $args[0], { logic => 'AND' }, @args[1..$#args] ) } 'new pager - arrayref where (positional args)';
 lives_ok { @results = $pager->search_where } 'search_where';
 is_deeply( \@results, [ @dataset, 
-			'TestApp', 
-			'( ( age <= ? ) AND ( age => ? ) AND ( city = ? ) ) ORDER BY fig ROWS 10 TO 15',
-			'80', '20', 'Jerusalem',
-			], 
-			'arrayref where (positional args) results' );
+            'TestApp', 
+            '( ( age <= ? AND age >= ? AND city = ? ) ) ORDER BY fig ROWS 10 TO 15',
+            '80', '20', 'Jerusalem',
+            ], 
+            'arrayref where (positional args) results' );
 
 
 

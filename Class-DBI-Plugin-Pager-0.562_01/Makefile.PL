@@ -10,7 +10,7 @@ WriteMakefile
                            'Class::DBI::Plugin::AbstractCount' => '0',
                            'Class::Data::Inheritable' => '0',
                            'Data::Page' => '2',
-                           'SQL::Abstract' => '0',
+                           'SQL::Abstract' => '1.61',
                            'Test::Exception' => '0',
                            'Test::More' => '0',
                            'Test::Warn' => '0',

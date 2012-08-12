@@ -10,7 +10,7 @@ use base qw( Data::Page Class::Data::Inheritable );
 
 use vars qw( $VERSION );
 
-$VERSION = 0.561;
+$VERSION = '0.562_01';
 
 # D::P inherits from Class::Accessor::Chained::Fast
 __PACKAGE__->mk_accessors( qw( where abstract_attr per_page page order_by _cdbi_app ) );
@@ -335,26 +335,26 @@ sub _setup_pager
 
 # SQL::Abstract::_recurse_where eats the WHERE clause 
 #sub where {
-#	my ( $self, $where_ref ) = @_;
+#   my ( $self, $where_ref ) = @_;
 #
-#	return $self->_where unless $where_ref;
+#   return $self->_where unless $where_ref;
 #
-#	my $where_copy;
+#   my $where_copy;
 #
-#	if ( ref( $where_ref ) eq 'HASH' ) {
-#		$where_copy = { %$where_ref };
-#	}
-#	elsif ( ref( $where_ref ) eq 'ARRAY' )
-#	{
-#		$where_copy = [ @$where_ref ];
-#	}
-#	else
-#	{
-#		die "WHERE clause [$where_ref] must be specified as an ARRAYREF or HASHREF";
-#	}
+#   if ( ref( $where_ref ) eq 'HASH' ) {
+#       $where_copy = { %$where_ref };
+#   }
+#   elsif ( ref( $where_ref ) eq 'ARRAY' )
+#   {
+#       $where_copy = [ @$where_ref ];
+#   }
+#   else
+#   {
+#       die "WHERE clause [$where_ref] must be specified as an ARRAYREF or HASHREF";
+#   }
 #
-#	# this will get eaten, but the caller's value is now protected
-#	$self->_where( $where_copy );
+#   # this will get eaten, but the caller's value is now protected
+#   $self->_where( $where_copy );
 #}
 
 =item set_syntax( [ $name || $class || $coderef ] )
@@ -514,11 +514,11 @@ __END__
 #clause and re-write it this way:
 #
 #SELECT * FROM (
-#	SELECT TOP 5 * FROM (
-#		SELECT TOP 15 my_column
-#		FROM my_table
-#		ORDER BY my_column ASC
-#	) AS foo ORDER BY my_column DESC
+#   SELECT TOP 5 * FROM (
+#       SELECT TOP 15 my_column
+#       FROM my_table
+#       ORDER BY my_column ASC
+#   ) AS foo ORDER BY my_column DESC
 #) AS bar ORDER BY my_column ASC
 #
 #=cut
