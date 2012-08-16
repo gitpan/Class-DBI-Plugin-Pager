@@ -10,7 +10,7 @@ use base qw( Data::Page Class::Data::Inheritable );
 
 use vars qw( $VERSION );
 
-$VERSION = '0.562_01';
+$VERSION = '0.563';
 
 # D::P inherits from Class::Accessor::Chained::Fast
 __PACKAGE__->mk_accessors( qw( where abstract_attr per_page page order_by _cdbi_app ) );

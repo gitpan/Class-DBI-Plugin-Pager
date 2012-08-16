@@ -1,8 +1,8 @@
 --- #YAML:1.0
 name: Class-DBI-Plugin-Pager
-version: 0.562_01
+version: 0.563
 author:
-  - David Baird <cpan@riverside-cms.co.uk>
+  - David Baird <cpan.zerofive@googlemail.com>
 abstract: paged queries for CDBI
 license: perl
 requires:
