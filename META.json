@@ -38,7 +38,7 @@
    "provides" : {
       "Class::DBI::Plugin::Pager" : {
          "file" : "lib/Class/DBI/Plugin/Pager.pm",
-         "version" : "0.565_01"
+         "version" : "0.566"
       },
       "Class::DBI::Plugin::Pager::LimitOffset" : {
          "file" : "lib/Class/DBI/Plugin/Pager/LimitOffset.pm",
@@ -57,11 +57,11 @@
          "version" : 0
       }
    },
-   "release_status" : "testing",
+   "release_status" : "stable",
    "resources" : {
       "repository" : {
          "url" : "git://github.com/majesticcpan/class-dbi-plugin-pager.git"
       }
    },
-   "version" : "0.565_01"
+   "version" : "0.566"
 }

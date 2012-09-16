@@ -10,7 +10,7 @@ use base qw( Data::Page Class::Data::Inheritable );
 
 use vars qw( $VERSION );
 
-$VERSION = '0.565_01';
+$VERSION = '0.566';
 
 # D::P inherits from Class::Accessor::Chained::Fast
 __PACKAGE__->mk_accessors( qw( where abstract_attr per_page page order_by _cdbi_app ) );
@@ -638,6 +638,7 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-DBI-Plugin-Pager>.
 =head1 COPYRIGHT AND LICENSE
 
 Copyright 2004-2012 by David Baird.
+
 Copyright 2012 Nikolay S. C<majestic@cpan.org>
 
 This library is free software; you can redistribute it and/or modify

@@ -1,5 +1,9 @@
 Revision history for Class-DBI-Plugin-Pager
 
+0.566 Sun September 16 16:45:00 2012
+    - code repository moved to github
+    - pod changes
+
 0.564 Mon August 16 13:36:00 2012
     - fixed version issues
 
