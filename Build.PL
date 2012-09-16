@@ -5,8 +5,13 @@ use Module::Build;
 my $builder = Module::Build->new(
     module_name         => 'Class::DBI::Plugin::Pager',
     license             => 'perl',
-    dist_author         => 'David Baird <cpan@riverside-cms.co.uk>',
+    dist_author         => ['David Baird', 'Nikolay S. <majestic@cpan.org>'],
     dist_version_from   => 'lib/Class/DBI/Plugin/Pager.pm',
+    meta_add => {
+        resources => {
+            repository => 'git://github.com/majesticcpan/class-dbi-plugin-pager.git',
+        },
+    },
     requires => { 'Test::More' => 0,
                   'Test::Exception' => 0,
                   'Test::Warn' => 0,

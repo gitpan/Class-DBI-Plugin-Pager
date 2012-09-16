@@ -10,7 +10,7 @@ use base qw( Data::Page Class::Data::Inheritable );
 
 use vars qw( $VERSION );
 
-$VERSION = '0.564';
+$VERSION = '0.565_01';
 
 # D::P inherits from Class::Accessor::Chained::Fast
 __PACKAGE__->mk_accessors( qw( where abstract_attr per_page page order_by _cdbi_app ) );
@@ -611,6 +611,11 @@ the entire results set, before chopping out the requested subset. It's probably
 a good idea to have an index on the column(s) used to order the results. For
 huge tables, this approach to paging may be too inefficient.
 
+=head1 SOURCE CODE
+
+The source code for this module is hosted on GitHub L<https://github.com/majesticcpan/class-dbi-plugin-pager>. 
+Feel free to fork the repository and submit pull requests!
+
 =head1 DEPENDENCIES
 
 L<SQL::Abstract|SQL::Abstract>,
@@ -633,11 +638,12 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Class-DBI-Plugin-Pager>.
 =head1 COPYRIGHT AND LICENSE
 
 Copyright 2004-2012 by David Baird.
+Copyright 2012 Nikolay S. C<majestic@cpan.org>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =head1 AUTHOR
 
-David Baird, C<cpan@riverside-cms.co.uk>
+David Baird
 

@@ -1,10 +1,34 @@
---- #YAML:1.0
-name: Class-DBI-Plugin-Pager
-version: 0.564
+---
+abstract: 'paged queries for CDBI'
 author:
-  - David Baird <cpan.zerofive@googlemail.com>
-abstract: paged queries for CDBI
+  - 'David Baird'
+  - 'Nikolay S. <majestic@cpan.org>'
+build_requires: {}
+configure_requires:
+  Module::Build: 0.40
+dynamic_config: 1
+generated_by: 'Module::Build version 0.4003, CPAN::Meta::Converter version 2.120921'
 license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Class-DBI-Plugin-Pager
+provides:
+  Class::DBI::Plugin::Pager:
+    file: lib/Class/DBI/Plugin/Pager.pm
+    version: 0.565_01
+  Class::DBI::Plugin::Pager::LimitOffset:
+    file: lib/Class/DBI/Plugin/Pager/LimitOffset.pm
+    version: 0
+  Class::DBI::Plugin::Pager::LimitXY:
+    file: lib/Class/DBI/Plugin/Pager/LimitXY.pm
+    version: 0
+  Class::DBI::Plugin::Pager::LimitYX:
+    file: lib/Class/DBI/Plugin/Pager/LimitYX.pm
+    version: 0
+  Class::DBI::Plugin::Pager::RowsTo:
+    file: lib/Class/DBI/Plugin/Pager/RowsTo.pm
+    version: 0
 requires:
   Carp: 0
   Class::DBI: 0.9
@@ -16,16 +40,6 @@ requires:
   Test::More: 0
   Test::Warn: 0
   UNIVERSAL::require: 0
-provides:
-  Class::DBI::Plugin::Pager:
-    file: lib/Class/DBI/Plugin/Pager.pm
-    version: 0.564
-  Class::DBI::Plugin::Pager::LimitOffset:
-    file: lib/Class/DBI/Plugin/Pager/LimitOffset.pm
-  Class::DBI::Plugin::Pager::LimitXY:
-    file: lib/Class/DBI/Plugin/Pager/LimitXY.pm
-  Class::DBI::Plugin::Pager::LimitYX:
-    file: lib/Class/DBI/Plugin/Pager/LimitYX.pm
-  Class::DBI::Plugin::Pager::RowsTo:
-    file: lib/Class/DBI/Plugin/Pager/RowsTo.pm
-generated_by: Module::Build version 0.2609
+resources:
+  repository: git://github.com/majesticcpan/class-dbi-plugin-pager.git
+version: 0.565_01

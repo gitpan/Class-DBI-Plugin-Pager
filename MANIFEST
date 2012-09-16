@@ -1,14 +1,12 @@
 Build.PL
-Makefile.PL
 Changes
-MANIFEST
-META.yml			
-README
 lib/Class/DBI/Plugin/Pager.pm
 lib/Class/DBI/Plugin/Pager/LimitOffset.pm
 lib/Class/DBI/Plugin/Pager/LimitXY.pm
 lib/Class/DBI/Plugin/Pager/LimitYX.pm
 lib/Class/DBI/Plugin/Pager/RowsTo.pm
+MANIFEST			This list of files
+README
 t/00.load.t
 t/01.load_subclass.t
 t/02.main.t
@@ -16,3 +14,6 @@ t/03.subclass.t
 t/04.auto_syntax.t
 t/pod-coverage.t
 t/pod.t
+Makefile.PL
+META.yml
+META.json
